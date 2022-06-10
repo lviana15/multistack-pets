@@ -1,27 +1,59 @@
-import { useState } from "react"
+import { AxiosError } from "axios";
+import { useState, useEffect } from "react"
 import { Pet } from '../../@types/Pet';
+import { ApiService} from '../../services/ApiServices';
 
 export function useIndex(){
-   const [listaPets, setListaPets] = useState(
-      [
-         {
-            id: 1,
-            nome: 'Bidu',
-            historia: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum dolores alias, similique, qui laudantium impedit repudiandae iure error atque possimus eum ut laboriosam numquam nihil beatae neque laborum perspiciatis officiis!',
-            foto: 'https://super.abril.com.br/wp-content/uploads/2018/05/filhotes-de-cachorro-alcanc3a7am-o-c3a1pice-de-fofura-com-8-semanas1.png'
-         },
-            {
-               id: 2,
-               nome: 'Rex',
-               historia: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum dolores alias, similique, qui laudantium impedit repudiandae iure error atque possimus eum ut laboriosam numquam nihil beatae neque laborum perspiciatis officiis!',
-               foto: 'https://www.petz.com.br/blog/wp-content/uploads/2022/04/cachorro-e-vertebrado-ou-invertebrado2.jpg'
-            }
-      ]
-   ),
+   const [listaPets, setListaPets] = useState<Pet[]>([]),
 
-      [petSelecionado, setPetSelecionado] = useState<Pet | null>(null),
-      [email, setEmail] = useState(''),
-      [valor, setValor] = useState('');
+   [petSelecionado, setPetSelecionado] = useState<Pet | null>(null),
+   [email, setEmail] = useState(''),
+   [valor, setValor] = useState(''),
+   [mensagem, setMensagem] = useState('');
+
+   useEffect(() => {
+      ApiService.get('/pets')
+         .then((resposta) => {
+            setListaPets(resposta.data);
+         })
+   }, [])
+
+   useEffect( () => {
+      if(petSelecionado === null){
+         limparFormulario();
+      }
+   }, [petSelecionado])
+
+   function adotar() {
+      if(petSelecionado !== null){
+         if(validarDadosAdocao()){
+            ApiService.post('/adocoes', {
+               pet_id: petSelecionado.id,
+               email,
+               valor
+            })
+               .then(() => {
+                  setPetSelecionado(null);
+                  setMensagem('Pet adotado com sucesso!');
+                  limparFormulario();
+               })
+               .catch((error: AxiosError) => {
+                  setMensagem(error.response?.data.message);
+               })
+         }else {
+            setMensagem('Preencha todos os campos corretamente!')
+         }
+      }
+   }
+
+   function validarDadosAdocao(){
+      return email.length > 0 && valor.length > 0;
+   }
+
+   function limparFormulario(){
+      setEmail('');
+      setValor('');
+   }
 
    return {
       listaPets,
@@ -30,7 +62,10 @@ export function useIndex(){
       email,
       setEmail,
       valor,
-      setValor
+      setValor,
+      mensagem,
+      setMensagem,
+      adotar
    };
 
 }
