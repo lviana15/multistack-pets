@@ -1,10 +1,16 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import Lista from '../ui/components/Lista/Lista'
-import Titulo from '../ui/components/Titulo/Titulo'
+import type { NextPage } from 'next';
+import Lista from '../ui/components/Lista/Lista';
+import Titulo from '../ui/components/Titulo/Titulo';
+import { Dialog, Grid, TextField, DialogActions, Button, Snackbar } from '@mui/material';
+import { useIndex } from '../data/hooks/pages/useIndex';
 
 const Home: NextPage = () => {
+   const { 
+      listaPets,
+      petSelecionado,
+      setPetSelecionado
+   } = useIndex();
+
   return (
     <div>
          <Titulo 
@@ -16,21 +22,55 @@ const Home: NextPage = () => {
          />
 
          <Lista 
-            pets={[
-               {
-                  id: 1,
-                  nome: 'Bidu',
-                  historia: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum dolores alias, similique, qui laudantium impedit repudiandae iure error atque possimus eum ut laboriosam numquam nihil beatae neque laborum perspiciatis officiis!',
-                  foto: 'https://super.abril.com.br/wp-content/uploads/2018/05/filhotes-de-cachorro-alcanc3a7am-o-c3a1pice-de-fofura-com-8-semanas1.png'
-               },
-                  {
-                     id: 2,
-                     nome: 'Rex',
-                     historia: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum dolores alias, similique, qui laudantium impedit repudiandae iure error atque possimus eum ut laboriosam numquam nihil beatae neque laborum perspiciatis officiis!',
-                     foto: 'https://www.petz.com.br/blog/wp-content/uploads/2022/04/cachorro-e-vertebrado-ou-invertebrado2.jpg'
-                  }
-            ]}
-            
+            pets={listaPets}
+            onSelect={ (pet) => setPetSelecionado(pet) }
+         />
+
+
+         <Dialog 
+            open={petSelecionado !== null}
+            fullWidth
+            PaperProps={{ sx: { p: 5 }}}
+            onClose={() => setPetSelecionado(null)}
+         >
+            <Grid container spacing={2}>
+
+               <Grid item xs={12}>
+                  <TextField 
+                     label={'Email'} 
+                     type={'email'}
+                     fullWidth
+                  />
+               </Grid>
+
+               <Grid item xs={12}>
+                  <TextField
+                     label={'Quantia por mês'}
+                     type={'number'}
+                     fullWidth
+                  />
+               </Grid>
+
+            </Grid>
+
+            <DialogActions sx={{mt: 5}}>
+               <Button 
+                  color={'secondary'}
+                  onClick={() => setPetSelecionado(null)}
+               >
+                  Cancelar
+               </Button>
+               <Button 
+                  variant={'contained'}
+               >
+                  Confirmar adoção
+               </Button>
+            </DialogActions>
+         </Dialog>
+
+         <Snackbar
+            open={false}
+            message={'kkkkk'}
          />
     </div>
   )
